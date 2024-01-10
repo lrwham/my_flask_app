@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, render_template, jsonify
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import matplotlib
@@ -8,16 +8,9 @@ import io
 
 app = Flask(__name__)
 
-@app.route("/")
-def main():
-    return '''
-    <p>Enter some text to echo!</p>
-     <form action="/echo_user_input" method="POST">
-         <input name="user_input">
-         <input type="submit" value="Submit!">
-     </form>
-     <p>Lawton Willingham</p>
-     '''
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 matplotlib.use('Agg')
 
@@ -38,8 +31,9 @@ def generate_word_cloud(words_with_weights):
 @app.route('/generate_wordcloud', methods=['POST'])
 def wordcloud_api():
     data = request.json
+    print (data)
     img = generate_word_cloud(data)
-    return send_file(img, mimetype='image/png', as_attachment=True, attachment_filename='wordcloud.png')
+    return send_file(img, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=False)

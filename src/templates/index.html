@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Word Cloud Generator</title>
+  </head>
+  <body>
+    <form id="wordForm">
+      <div id="wordInputs">
+        <!-- Dynamically add input fields here -->
+      </div>
+      <button type="submit">Generate Word Cloud</button>
+    </form>
+    <img id="myImage" alt="Fetched Image" />
+
+    <div id="wordCloud">
+      <!-- Word cloud will be displayed here -->
+    </div>
+
+    <script>
+      // Default list with five words and their weights
+      let defaults = {
+      "banana": 0.1,
+      "apple": 0.15,
+      "pearl": 0.15,
+      "car": 0.3,
+      "house": 0.3,
+      };
+
+      document.addEventListener("DOMContentLoaded", function () {
+      const wordInputs = document.getElementById("wordInputs");
+      const keys = Object.keys(defaults); // Get the keys of the defaults object
+
+      for (let i = 0; i < keys.length; i++) { // Use keys.length instead of hardcoding the number
+      const key = keys[i]; // Current key
+      const value = defaults[key]; // Value corresponding to the key
+
+      wordInputs.innerHTML += `Word ${
+      i + 1
+      }: <input placeholder="${key}" type="text" name="word${i}" required> Weight: <input placeholder="${value}" type="number" step="0.01" name="weight${i}" required><br>`;
+      }
+      });
+
+
+      document
+      .getElementById("wordForm")
+      .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const data = {};
+      let temp = [];
+      formData.forEach((value, key) => {
+      temp.push(value);
+      });
+
+      for (let i = 0; i < temp.length; i++) {
+      if (i % 2 == 0) {
+      data[temp[i]] = parseFloat(temp[i + 1]);
+      }
+      }
+
+      console.log(temp);
+      console.log(JSON.stringify(data));
+
+      fetch("/generate_wordcloud", {
+      method: "POST",
+      headers: {
+      "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      })
+      .then((response) => response.blob()) // Convert to blob
+      .then((blob) => {
+      // Create a local URL for the blob
+      const imageUrl = URL.createObjectURL(blob);
+
+      // Find the image element (e.g., with id 'myImage') and set its source
+      document.getElementById("myImage").src = imageUrl;
+      })
+      .catch((error) =>
+      console.error("Error fetching the image:", error)
+      );
+      });
+    </script>
+  </body>
+</html>
